@@ -39,12 +39,25 @@ int main(void) {
     Entity player = {BOARD_X/2-1, BOARD_Y-3};
     Entity beam = {player.x, player.y};
     Entity snapshot = player;
+
+    // ENEMY
+    std::vector<Entity> enemy;
+    for (size_t i = 0; i < 5; i++) {
+        enemy.push_back({.x = static_cast<size_t>(gen_random_int(1, BOARD_X-1)), .y = 1});
+    }
+    // return 0;
+    // END GEN ENEMY
+
     auto beam_timeout = std::chrono::high_resolution_clock::now();
     auto beam_speed = std::chrono::high_resolution_clock::now();
+    auto enemy_speed = std::chrono::high_resolution_clock::now();
+    auto enemy_spawn_speed = std::chrono::high_resolution_clock::now();
     while (running == true) {
         auto current_time = std::chrono::high_resolution_clock::now();
         auto beam_timeout_internal = std::chrono::duration_cast<std::chrono::duration<double>>(current_time - beam_timeout);
         auto beam_speed_internal = std::chrono::duration_cast<std::chrono::duration<double>>(current_time - beam_speed);
+        auto enemy_speed_internal = std::chrono::duration_cast<std::chrono::duration<double>>(current_time - enemy_speed);
+        auto enemy_spawn_speed_internal = std::chrono::duration_cast<std::chrono::duration<double>>(current_time - enemy_spawn_speed);
         if (beam_timeout_internal.count() >= 0.5){
             if (beam.y <= 0 || beam.y >= BOARD_Y) {
                 beam = {player.x, player.y};
@@ -53,21 +66,46 @@ int main(void) {
         }
         if (beam_speed_internal.count() >= 0.1){
             beam.y -= 1;
+            if (beam.y <= 0) beam = {BOARD_X+1, BOARD_Y+1};
             beam_speed = current_time;
+        }
+        if (enemy_spawn_speed_internal.count() > 10) {
+            for (size_t i = 0; i < 5; i++) {
+                enemy.push_back({.x = static_cast<size_t>(gen_random_int(1, BOARD_X-1)), .y = 1});
+            }
+            enemy_spawn_speed = current_time;
+        }
+        if (enemy_speed_internal.count() >= 0.8) {
+            for(size_t i = 0; i < enemy.size(); i++) {
+                if (enemy[i].y >= BOARD_Y-2) {
+                    enemy.erase(enemy.begin()+i);
+                } else {
+                    enemy[i].y += 1;
+                }
+            }
+            enemy_speed = current_time;
+        }
+        for (size_t i = 0; i < enemy.size(); i++) {
+            if (enemy[i].x == beam.x && enemy[i].y == beam.y) {
+                enemy.erase(enemy.begin()+i);
+            } else if (enemy[i].x == player.x && enemy[i].y == player.y) {
+                return 1;
+            }
         }
         for (size_t y = 0; y < BOARD_Y; y++) {
             for (size_t x = 0; x < BOARD_X; x++) {
                 if (y == 0 || x == 0 || y == BOARD_Y-1 || x == BOARD_X-1) {
                     mvprintw(y, x, "%c", '#');
-                } else if (y == player.y && x == player.x) {
-                    mvprintw(y, x, "%c", 'M');
-                } else if (x == beam.x && y == beam.y) {
-                        mvprintw(y, x, "%c", '|');
                 } else {
-                        mvprintw(y, x, " ");
-                    }
+                    mvprintw(y, x, " ");
+                }
             }
         } 
+        if (beam.y != BOARD_Y+1 && beam.x != BOARD_X+1) mvprintw(beam.y, beam.x, "%c", '|');
+        mvprintw(player.y, player.x, "%c", 'M');
+        for (const auto indv_en: enemy) {
+            mvprintw(indv_en.y, indv_en.x, "%c", 'W');
+        }
         refresh();
         ch = getch();
 
