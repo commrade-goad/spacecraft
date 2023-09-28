@@ -35,6 +35,7 @@ int gen_random_int(int min, int max) {
 int main(void) {
     init_curses_screen();
     int ch;
+    size_t point = 0;
     bool running = true;
     Entity player = {BOARD_X/2-1, BOARD_Y-3};
     Entity beam = {player.x, player.y};
@@ -43,7 +44,7 @@ int main(void) {
     // ENEMY
     std::vector<Entity> enemy;
     for (int i = 0; i < gen_random_int(4, 10); i++) {
-        enemy.push_back({.x = gen_random_int(1, BOARD_X-1), .y = gen_random_int(-2, 1)});
+        enemy.push_back({.x = gen_random_int(1, BOARD_X-2), .y = gen_random_int(-2, 1)});
     }
     // return 0;
     // END GEN ENEMY
@@ -71,7 +72,7 @@ int main(void) {
         }
         if (enemy_spawn_speed_internal.count() > 10) {
             for (size_t i = 0; i < 5; i++) {
-                enemy.push_back({.x = gen_random_int(1, BOARD_X-1), .y = 1});
+                enemy.push_back({.x = gen_random_int(1, BOARD_X-2), .y = gen_random_int(-2, 1)});
             }
             enemy_spawn_speed = current_time;
         }
@@ -88,6 +89,7 @@ int main(void) {
         for (size_t i = 0; i < enemy.size(); i++) {
             if (enemy[i].x == beam.x && enemy[i].y == beam.y) {
                 enemy.erase(enemy.begin()+i);
+                point++;
             } else if (enemy[i].x == player.x && enemy[i].y == player.y) {
                 return 1;
             }
@@ -104,8 +106,12 @@ int main(void) {
         if (beam.y != BOARD_Y+1 && beam.x != BOARD_X+1) mvprintw(beam.y, beam.x, "%c", '|');
         mvprintw(player.y, player.x, "%c", 'M');
         for (const auto indv_en: enemy) {
-            mvprintw(indv_en.y, indv_en.x, "%c", 'W');
+            if (indv_en.y >= 1) {
+                mvprintw(indv_en.y, indv_en.x, "%c", 'W');
+            }
         }
+
+        mvprintw(0, 2, "POINT : %lu", point);
         curs_set(0);
         refresh();
         ch = getch();
