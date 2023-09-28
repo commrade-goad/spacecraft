@@ -5,12 +5,12 @@
 #include <curses.h>
 #include <chrono>
 
-const size_t BOARD_X = 30;
-const size_t BOARD_Y = 10;
+const int BOARD_X = 30;
+const int BOARD_Y = 10;
 
 typedef struct {
-    size_t x;
-    size_t y;
+    int x;
+    int y;
 } Entity;
 
 void init_curses_screen() {
@@ -42,8 +42,8 @@ int main(void) {
 
     // ENEMY
     std::vector<Entity> enemy;
-    for (size_t i = 0; i < 5; i++) {
-        enemy.push_back({.x = static_cast<size_t>(gen_random_int(1, BOARD_X-1)), .y = 1});
+    for (int i = 0; i < gen_random_int(4, 10); i++) {
+        enemy.push_back({.x = gen_random_int(1, BOARD_X-1), .y = gen_random_int(-2, 1)});
     }
     // return 0;
     // END GEN ENEMY
@@ -71,7 +71,7 @@ int main(void) {
         }
         if (enemy_spawn_speed_internal.count() > 10) {
             for (size_t i = 0; i < 5; i++) {
-                enemy.push_back({.x = static_cast<size_t>(gen_random_int(1, BOARD_X-1)), .y = 1});
+                enemy.push_back({.x = gen_random_int(1, BOARD_X-1), .y = 1});
             }
             enemy_spawn_speed = current_time;
         }
@@ -106,6 +106,7 @@ int main(void) {
         for (const auto indv_en: enemy) {
             mvprintw(indv_en.y, indv_en.x, "%c", 'W');
         }
+        curs_set(0);
         refresh();
         ch = getch();
 

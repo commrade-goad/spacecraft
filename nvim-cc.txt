@@ -1,2 +1,2 @@
 ninja -C build
-./build/2dtest
+./build/spacecraft

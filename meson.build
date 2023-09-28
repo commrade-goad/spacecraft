@@ -4,7 +4,7 @@ project('2dtest', 'cpp',
 
 curses = dependency('curses', method: 'pkg-config')
 
-executable('2dtest',
+executable('spacecraft',
            'main.cpp',
            dependencies: curses,
            include_directories: curses.get_pkgconfig_variable('includedir'),
