@@ -89,8 +89,10 @@ int main(void) {
         for (size_t i = 0; i < enemy.size(); i++) {
             if (enemy[i].x == beam.x && enemy[i].y == beam.y) {
                 enemy.erase(enemy.begin()+i);
+                beam.x = BOARD_X+1;
                 point++;
             } else if (enemy[i].x == player.x && enemy[i].y == player.y) {
+                close_curses_screen();
                 return 1;
             }
         }
