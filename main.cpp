@@ -32,7 +32,13 @@ int gen_random_int(int min, int max) {
     return distr(gen);
 }
 
-int main(void) {
+void gen_enemy(std::vector<Entity> &enemyVec){
+    for (int i = 0; i < gen_random_int(4, 10); i++) {
+        enemyVec.push_back({.x = gen_random_int(1, BOARD_X-2), .y = gen_random_int(-2, 1)});
+    }
+}
+
+void game() {
     init_curses_screen();
     int ch;
     size_t point = 0;
@@ -43,10 +49,7 @@ int main(void) {
 
     // ENEMY
     std::vector<Entity> enemy;
-    for (int i = 0; i < gen_random_int(4, 10); i++) {
-        enemy.push_back({.x = gen_random_int(1, BOARD_X-2), .y = gen_random_int(-2, 1)});
-    }
-    // return 0;
+    gen_enemy(enemy);
     // END GEN ENEMY
 
     auto beam_timeout = std::chrono::high_resolution_clock::now();
@@ -71,12 +74,10 @@ int main(void) {
             beam_speed = current_time;
         }
         if (enemy_spawn_speed_internal.count() > 10) {
-            for (size_t i = 0; i < 5; i++) {
-                enemy.push_back({.x = gen_random_int(1, BOARD_X-2), .y = gen_random_int(-2, 1)});
-            }
+            gen_enemy(enemy);
             enemy_spawn_speed = current_time;
         }
-        if (enemy_speed_internal.count() >= 0.8) {
+        if (enemy_speed_internal.count() >= 0.6) {
             for(size_t i = 0; i < enemy.size(); i++) {
                 if (enemy[i].y >= BOARD_Y-2) {
                     enemy.erase(enemy.begin()+i);
@@ -93,7 +94,7 @@ int main(void) {
                 point++;
             } else if (enemy[i].x == player.x && enemy[i].y == player.y) {
                 close_curses_screen();
-                return 1;
+                return;
             }
         }
         for (size_t y = 0; y < BOARD_Y; y++) {
@@ -118,10 +119,6 @@ int main(void) {
         refresh();
         ch = getch();
 
-        if (ch == 'q') {
-            break;
-        }
-
         if (player.x <= 0 || player.x >= BOARD_X-1 || player.y <= 0 || player.y >= BOARD_Y-1) {
             player = snapshot;
         } else {
@@ -144,9 +141,17 @@ int main(void) {
                 ++player.x;
                 break;
             }
+            case 'q':{
+                close_curses_screen();
+                return;
+            }
             default: break;
         }
     }
     close_curses_screen();
+}
+
+int main(void) {
+    game();
     return 0;
 }
