@@ -119,8 +119,7 @@ void game() {
         refresh();
         ch = getch();
 
-        if (player.x <= 0 || player.x >= BOARD_X-1 || player.y <= 0 || player.y >= BOARD_Y-1) {
-            player = snapshot;
+        if (player.x <= 0 || player.x >= BOARD_X-1 || player.y <= 0 || player.y >= BOARD_Y-1) { player = snapshot;
         } else {
             snapshot = player;
         }
@@ -151,7 +150,49 @@ void game() {
     close_curses_screen();
 }
 
+void game_menu(void) {
+    init_curses_screen();
+    int ch;
+    while (1) {
+        for (size_t y = 0; y < BOARD_Y; y++) {
+            for (size_t x = 0; x < BOARD_X; x++) {
+                if (y == 0 || x == 0 || y == BOARD_Y-1 || x == BOARD_X-1) {
+                    mvprintw(y, x, "%c", '#');
+                } else {
+                    mvprintw(y, x, " ");
+                }
+            }
+        }
+        std::string title = "SPACECRAFT";
+        std::string play_s = "(p) Play";
+        std::string quit_s = "(q) Quit";
+
+        size_t halfScX_title = BOARD_X / 2 - (title.length() / 2);
+        size_t halfScX_play = BOARD_X /2 - (play_s.length() / 2);
+        size_t halfScX_quit = BOARD_X /2 - (quit_s.length() / 2);
+        size_t halfScY = BOARD_Y / 4;
+        mvprintw(halfScY, halfScX_title, "%s", title.c_str());
+        mvprintw(halfScY+2, halfScX_play, "%s", play_s.c_str());
+        mvprintw(halfScY+3, halfScX_quit, "%s", quit_s.c_str());
+        refresh();
+        ch = getch();
+        switch (ch) {
+            case 'p':{
+                game();
+                break;
+            }
+            case 'q':{
+                close_curses_screen();
+                exit(0);
+            }
+            default: break;
+        }
+    }
+    close_curses_screen();
+}
+
 int main(void) {
-    game();
+    game_menu();
+    // game();
     return 0;
 }
